@@ -1,11 +1,10 @@
 "use client";
 
-import { FC, Suspense, use, useEffect, useRef } from "react";
-import { Edges, OrbitControls, useVideoTexture, Text } from "@react-three/drei";
+import { FC, Suspense, useEffect, useRef } from "react";
+import { OrbitControls, useVideoTexture } from "@react-three/drei";
 import { BackSide } from "three";
 import { usePlayerStore } from "@/app/store";
 import { AnnotationBox } from "./annotation-box";
-import { getTimeString } from "@/lib/utils";
 
 interface VideoMaterialProps {}
 
