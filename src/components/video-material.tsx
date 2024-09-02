@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, Suspense, useCallback, useEffect, useRef } from "react";
+import { FC, Suspense, useEffect, useRef } from "react";
 import { OrbitControls, useVideoTexture } from "@react-three/drei";
 import { BackSide } from "three";
 import { usePlayerStore } from "@/app/store";
@@ -8,57 +8,78 @@ import { usePlayerStore } from "@/app/store";
 interface VideoMaterialProps {}
 
 export const VideoMaterial: FC<VideoMaterialProps> = () => {
-  const { isPlaying, setResetVideoFn, setIsPlaying } = usePlayerStore();
+  const {
+    isPlaying,
+    setResetVideoFn,
+    setIsPlaying,
+    setProgress,
+    progress,
+    setDuration,
+  } = usePlayerStore();
 
-  const texture = useVideoTexture("/trimmed.mp4", {
+  const texture = useVideoTexture("/vid.mp4", {
     unsuspend: "canplay",
     muted: true,
     start: false,
     loop: false,
   });
 
-  const videoEl = useRef<HTMLVideoElement | null>(null);
+  const videoElRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (!texture?.source?.data) return;
-    videoEl.current = texture.source.data;
+    videoElRef.current = texture.source.data;
+
+    console.log("videoElRef", texture.source);
 
     const handleEnded = () => setIsPlaying(false);
     const handleTimeUpdate = () => {
-      if (!videoEl.current) return;
-      console.log("timeupdate", videoEl.current.currentTime);
+      if (!videoElRef.current) return;
+      console.log("timeupdate", videoElRef.current.currentTime);
+
+      setProgress(videoElRef.current.currentTime);
     };
 
     const resetVideo = () => {
-      if (!videoEl.current) return;
+      if (!videoElRef.current) return;
 
-      videoEl.current.pause();
-      videoEl.current.currentTime = 0;
+      videoElRef.current.pause();
+      videoElRef.current.currentTime = 0;
     };
 
-    if (videoEl.current) {
-      videoEl.current.addEventListener("ended", handleEnded);
-      videoEl.current.addEventListener("timeupdate", handleTimeUpdate);
+    if (videoElRef.current) {
+      videoElRef.current.addEventListener("ended", handleEnded);
+      videoElRef.current.addEventListener("timeupdate", handleTimeUpdate);
       setResetVideoFn(resetVideo);
+      setDuration(videoElRef.current.duration);
     }
 
     return () => {
-      if (videoEl.current) {
-        videoEl.current.removeEventListener("ended", handleEnded);
-        videoEl.current.removeEventListener("timeupdate", handleTimeUpdate);
+      if (videoElRef.current) {
+        videoElRef.current.removeEventListener("ended", handleEnded);
+        videoElRef.current.removeEventListener("timeupdate", handleTimeUpdate);
       }
     };
-  }, [texture, setIsPlaying]);
+  }, [texture, setIsPlaying, setProgress, setResetVideoFn, setDuration]);
 
   useEffect(() => {
-    if (!videoEl.current) return;
+    if (!videoElRef.current) return;
 
     if (isPlaying) {
-      videoEl.current.play();
+      videoElRef.current.play();
     } else {
-      videoEl.current.pause();
+      videoElRef.current.pause();
     }
   }, [isPlaying]);
+
+  useEffect(() => {
+    if (!videoElRef.current) return;
+
+    const timeDelta = Math.abs(progress - videoElRef.current.currentTime);
+    if (timeDelta < 1) return;
+
+    videoElRef.current.currentTime = progress;
+  }, [progress]);
 
   return (
     <mesh scale={[-1, 1, 1]}>

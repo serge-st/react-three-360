@@ -5,6 +5,10 @@ type PlayerStore = {
   setIsPlaying: (isPlaying: boolean) => void;
   resetVideoFn: undefined | (() => void);
   setResetVideoFn: (resetFunction: () => void) => void;
+  progress: number;
+  setProgress: (progress: number) => void;
+  duration: number;
+  setDuration: (duration: number) => void;
 };
 
 export const usePlayerStore = create<PlayerStore>((set) => ({
@@ -13,4 +17,8 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
   resetVideoFn: undefined,
   setResetVideoFn: (resetFunction) =>
     set(() => ({ resetVideoFn: resetFunction })),
+  progress: 0,
+  setProgress: (progress) => set(() => ({ progress })),
+  duration: 0,
+  setDuration: (duration) => set(() => ({ duration })),
 }));
