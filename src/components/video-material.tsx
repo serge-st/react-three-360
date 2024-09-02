@@ -4,7 +4,7 @@ import { FC, Suspense, useEffect, useRef } from "react";
 import { OrbitControls, useVideoTexture } from "@react-three/drei";
 import { BackSide } from "three";
 import { usePlayerStore } from "@/app/store";
-import { AnnotationBox } from "./annotation-box";
+import { Overlay } from "./overlay";
 
 interface VideoMaterialProps {}
 
@@ -16,7 +16,6 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
     setProgress,
     progress,
     setDuration,
-    videoTime,
   } = usePlayerStore();
 
   const texture = useVideoTexture("/vid.mp4", {
@@ -31,14 +30,10 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
   useEffect(() => {
     if (!texture?.source?.data) return;
     videoElRef.current = texture.source.data;
+  }, [texture]);
 
-    console.log("videoElRef", texture.source);
-
-    const handleEnded = () => setIsPlaying(false);
-    const handleTimeUpdate = () => {
-      if (!videoElRef.current) return;
-      setProgress(videoElRef.current.currentTime);
-    };
+  useEffect(() => {
+    if (!videoElRef.current) return;
 
     const resetVideo = () => {
       if (!videoElRef.current) return;
@@ -47,12 +42,21 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
       videoElRef.current.currentTime = 0;
     };
 
-    if (videoElRef.current) {
-      videoElRef.current.addEventListener("ended", handleEnded);
-      videoElRef.current.addEventListener("timeupdate", handleTimeUpdate);
-      setResetVideoFn(resetVideo);
-      setDuration(videoElRef.current.duration);
-    }
+    setResetVideoFn(resetVideo);
+    setDuration(videoElRef.current.duration);
+  }, [setResetVideoFn, setDuration]);
+
+  useEffect(() => {
+    if (!videoElRef.current) return;
+
+    const handleEnded = () => setIsPlaying(false);
+    const handleTimeUpdate = () => {
+      if (!videoElRef.current) return;
+      setProgress(videoElRef.current.currentTime);
+    };
+
+    videoElRef.current.addEventListener("ended", handleEnded);
+    videoElRef.current.addEventListener("timeupdate", handleTimeUpdate);
 
     return () => {
       if (videoElRef.current) {
@@ -60,7 +64,7 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
         videoElRef.current.removeEventListener("timeupdate", handleTimeUpdate);
       }
     };
-  }, [texture, setIsPlaying, setProgress, setResetVideoFn, setDuration]);
+  }, [setIsPlaying, setProgress]);
 
   useEffect(() => {
     if (!videoElRef.current) return;
@@ -84,16 +88,16 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
   return (
     <group>
       <mesh scale={[-1, 1, 1]}>
+        <Overlay
+          width={videoElRef.current?.videoWidth}
+          height={videoElRef.current?.videoHeight}
+        />
         <sphereGeometry args={[50, 128, 128]} />
         <Suspense fallback={null}>
           <meshBasicMaterial map={texture} side={BackSide} />
         </Suspense>
         <OrbitControls enableZoom={false} reverseOrbit={true} />
       </mesh>
-
-      <AnnotationBox position={[30, 0, 5]} width={10} height={5}>
-        test
-      </AnnotationBox>
     </group>
   );
 };
