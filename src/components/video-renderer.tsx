@@ -13,7 +13,7 @@ export const VideoRenderer: FC<VideoRendererProps> = ({ width, height }) => {
       <Canvas
         className="cursor-grab active:cursor-grabbing"
         camera={{
-          fov: 74,
+          fov: 100,
           near: 1,
           far: 100,
           aspect: width / height,

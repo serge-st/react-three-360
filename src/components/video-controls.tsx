@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { usePlayerStore } from "@/app/store";
 import { Slider } from "./ui/slider";
@@ -20,14 +20,27 @@ export const VideoContorls: FC = () => {
     resetVideoFn();
   };
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     isPlaying ? setIsPlaying(false) : setIsPlaying(true);
-  };
+  }, [isPlaying, setIsPlaying]);
 
   const changeProgress = (value: number[]) => {
     const [newValue] = value;
     setProgress(newValue);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== "Space") return;
+      togglePlay();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [togglePlay]);
 
   return (
     <div className="flex flex-col gap-8 justify-center items-center">
