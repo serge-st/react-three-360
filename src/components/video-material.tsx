@@ -1,9 +1,10 @@
 "use client";
 
 import { FC, Suspense, useEffect, useRef } from "react";
-import { OrbitControls, useVideoTexture } from "@react-three/drei";
+import { Edges, OrbitControls, useVideoTexture, Text } from "@react-three/drei";
 import { BackSide } from "three";
 import { usePlayerStore } from "@/app/store";
+import { AnnotationBox } from "./annotation-box";
 
 interface VideoMaterialProps {}
 
@@ -82,12 +83,18 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
   }, [progress]);
 
   return (
-    <mesh scale={[-1, 1, 1]}>
-      <sphereGeometry args={[50, 128, 128]} />
-      <Suspense fallback={<h1>Loading...</h1>}>
-        <meshBasicMaterial map={texture} side={BackSide} />
-      </Suspense>
-      <OrbitControls enableZoom={false} reverseOrbit={true} />
-    </mesh>
+    <group>
+      <mesh scale={[-1, 1, 1]}>
+        <sphereGeometry args={[50, 128, 128]} />
+        <Suspense fallback={null}>
+          <meshBasicMaterial map={texture} side={BackSide} />
+        </Suspense>
+        <OrbitControls enableZoom={false} reverseOrbit={true} />
+      </mesh>
+
+      <AnnotationBox position={[30, 0, 5]} width={10} height={5}>
+        test
+      </AnnotationBox>
+    </group>
   );
 };
