@@ -39,7 +39,9 @@ export const VideoContorls: FC = () => {
       />
       <div className="flex gap-4">
         <Button onClick={resetVideo}>Back To Start</Button>
-        <Button onClick={togglePlay}>{isPlaying ? "Stop" : "Play"}</Button>
+        <Button onClick={togglePlay} className="w-16">
+          {isPlaying ? "Stop" : "Play"}
+        </Button>
       </div>
     </div>
   );
