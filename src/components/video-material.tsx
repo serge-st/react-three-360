@@ -1,10 +1,11 @@
 "use client";
 
-import { FC, Suspense, useEffect, useRef } from "react";
+import { FC, Suspense, use, useEffect, useRef } from "react";
 import { Edges, OrbitControls, useVideoTexture, Text } from "@react-three/drei";
 import { BackSide } from "three";
 import { usePlayerStore } from "@/app/store";
 import { AnnotationBox } from "./annotation-box";
+import { getTimeString } from "@/lib/utils";
 
 interface VideoMaterialProps {}
 
@@ -16,6 +17,7 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
     setProgress,
     progress,
     setDuration,
+    videoTime,
   } = usePlayerStore();
 
   const texture = useVideoTexture("/vid.mp4", {
@@ -36,8 +38,6 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
     const handleEnded = () => setIsPlaying(false);
     const handleTimeUpdate = () => {
       if (!videoElRef.current) return;
-      console.log("timeupdate", videoElRef.current.currentTime);
-
       setProgress(videoElRef.current.currentTime);
     };
 

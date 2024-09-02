@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { getTimeString } from "@/lib/utils";
 
 type PlayerStore = {
   isPlaying: boolean;
@@ -6,6 +7,7 @@ type PlayerStore = {
   resetVideoFn: undefined | (() => void);
   setResetVideoFn: (resetFunction: () => void) => void;
   progress: number;
+  videoTime: string;
   setProgress: (progress: number) => void;
   duration: number;
   setDuration: (duration: number) => void;
@@ -18,7 +20,9 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
   setResetVideoFn: (resetFunction) =>
     set(() => ({ resetVideoFn: resetFunction })),
   progress: 0,
-  setProgress: (progress) => set(() => ({ progress })),
+  videoTime: "00:00",
+  setProgress: (progress) =>
+    set(() => ({ progress, videoTime: getTimeString(progress) })),
   duration: 0,
   setDuration: (duration) => set(() => ({ duration })),
 }));
