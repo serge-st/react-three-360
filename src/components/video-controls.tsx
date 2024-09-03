@@ -1,7 +1,8 @@
 import { FC, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { usePlayerStore } from "@/app/store";
+import { useVideoPlayerStore } from "@/app/store";
 import { Slider } from "./ui/slider";
+import { getDurationFromString } from "@/lib/utils";
 
 export const VideoContorls: FC = () => {
   const {
@@ -12,7 +13,30 @@ export const VideoContorls: FC = () => {
     setProgress,
     duration,
     videoTime,
-  } = usePlayerStore();
+    defects,
+  } = useVideoPlayerStore();
+
+  const togglePlay = useCallback(() => {
+    isPlaying ? setIsPlaying(false) : setIsPlaying(true);
+  }, [isPlaying, setIsPlaying]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        togglePlay();
+      }
+    },
+    [togglePlay]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   const resetVideo = () => {
     if (!resetVideoFn) return;
@@ -20,27 +44,16 @@ export const VideoContorls: FC = () => {
     resetVideoFn();
   };
 
-  const togglePlay = useCallback(() => {
-    isPlaying ? setIsPlaying(false) : setIsPlaying(true);
-  }, [isPlaying, setIsPlaying]);
-
   const changeProgress = (value: number[]) => {
     const [newValue] = value;
     setProgress(newValue);
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code !== "Space") return;
-      togglePlay();
-    };
+  const jumpToDefect = (time: string) => {
+    changeProgress([getDurationFromString(time)]);
+  };
 
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [togglePlay]);
+  const defectArray = defects ? Array.from(defects.values()) : undefined;
 
   return (
     <div className="flex flex-col gap-8 justify-center items-center">
@@ -59,6 +72,22 @@ export const VideoContorls: FC = () => {
         <Button onClick={togglePlay} className="w-16">
           {isPlaying ? "Stop" : "Play"}
         </Button>
+      </div>
+      <div className="flex flex-col gap-4 items-center">
+        <h2>Defects</h2>
+        <div className="flex gap-4 w-[800px] overflow-auto p-2">
+          {defectArray &&
+            defectArray.map((defect) => (
+              <Button
+                key={defect.video_time}
+                variant="outline"
+                className="text-xs"
+                onClick={() => jumpToDefect(defect.video_time)}
+              >
+                {defect.video_time}
+              </Button>
+            ))}
+        </div>
       </div>
     </div>
   );

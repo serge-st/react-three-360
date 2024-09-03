@@ -3,11 +3,10 @@
 import { FC, Suspense, useEffect, useRef } from "react";
 import { OrbitControls, useVideoTexture } from "@react-three/drei";
 import { BackSide } from "three";
-import { usePlayerStore } from "@/app/store";
+import { useVideoPlayerStore } from "@/app/store";
+import { Overlay } from "./overlay";
 
-interface VideoMaterialProps {}
-
-export const VideoMaterial: FC<VideoMaterialProps> = () => {
+export const VideoMaterial: FC = () => {
   const {
     isPlaying,
     setResetVideoFn,
@@ -15,9 +14,10 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
     setProgress,
     progress,
     setDuration,
-  } = usePlayerStore();
+    videoUrl,
+  } = useVideoPlayerStore();
 
-  const texture = useVideoTexture("/vid.mp4", {
+  const texture = useVideoTexture(videoUrl, {
     unsuspend: "canplay",
     muted: true,
     start: false,
@@ -85,14 +85,18 @@ export const VideoMaterial: FC<VideoMaterialProps> = () => {
   }, [progress]);
 
   return (
-    <group>
-      <mesh scale={[-1, 1, 1]}>
-        <sphereGeometry args={[50, 128, 128]} />
-        <Suspense fallback={null}>
+    <Suspense fallback={null}>
+      <group>
+        <Overlay
+          width={videoElRef.current?.videoWidth}
+          height={videoElRef.current?.videoHeight}
+        />
+        <mesh scale={[-1, 1, 1]}>
+          <sphereGeometry args={[50, 128, 128]} />
           <meshBasicMaterial map={texture} side={BackSide} />
-        </Suspense>
-        <OrbitControls enableZoom={false} reverseOrbit={true} />
-      </mesh>
-    </group>
+          <OrbitControls enableZoom={false} reverseOrbit={true} />
+        </mesh>
+      </group>
+    </Suspense>
   );
 };
