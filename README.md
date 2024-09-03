@@ -24,6 +24,6 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-This is a project to prof the concept, the implementation is raw.
+This is a project to proof the concept, the implementation is raw.
 
 To awoid leaking sensitive information all the files are uploaded by the client.
